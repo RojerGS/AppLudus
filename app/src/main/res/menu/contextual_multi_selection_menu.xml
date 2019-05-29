@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/show_in_map_option"
+        android:title="@string/menu_show_in_map"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/select_all_option"
+        android:title="@string/menu_select_all"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/select_none_option"
+        android:title="@string/menu_select_none"
+        app:showAsAction="never"/>
+</menu>

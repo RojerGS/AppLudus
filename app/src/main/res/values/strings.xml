@@ -1,0 +1,54 @@
+<resources>
+    <string name="app_name">VISLIS Lúdica</string>
+
+    <!-- strings for the tabs -->
+    <string name="tab_loc_info_text">Detalhes</string>
+    <string name="tab_loc_list_text">Locais</string>
+    <string name="tab_map_text">Mapa</string>
+
+    <string name="category_header_">%s (%d)</string>
+    <plurals name="category_header">
+        <item quantity="one">%s (%d local)</item>
+        <item quantity="other">%s (%d locais)</item>
+    </plurals>
+
+    <!-- strings for the ListFragment itself -->
+    <plurals name="locations_count">
+        <item quantity="one">%d ponto de interesse:</item>
+        <item quantity="other">%d pontos de interesse:</item>
+    </plurals>
+
+    <!-- strings for the InfoFragment itself -->
+    <string name="detail_fragment_default_name">Escolha um local da lista.</string>
+    <string name="distance_to_location">Distância: %s</string>
+    <string name="time_to_location">Tempo: %s</string>
+    <string name="distance_to_location_null">\?</string>
+    <string name="time_to_location_null">\?</string>
+
+    <string name="show_in_map">Ver no mapa</string>
+    <string name="back_string">Voltar</string>
+    <string name="cab_action">Marcar no mapa</string>
+
+    <!-- strings related to showing/hiding already visited places -->
+    <string name="visited_were_hidden">A esconder os locais visitados.</string>
+    <string name="visited_were_shown">A mostrar todos os locais.</string>
+    <string name="visited_switch_string">Visitado:</string>
+    <string name="visited_status_filename" translatable="false">com.mathspp.appludus.visited_status</string>
+
+    <!-- strings for the contextual menu that allows multi selection -->
+    <string name="menu_show_in_map">Ver no mapa</string>
+    <string name="menu_select_all">Selecionar todos</string>
+    <string name="menu_select_none">Limpar seleção</string>
+
+    <!-- strings for the main menu -->
+    <string name="main_menu_multi_selection">Marcar vários pontos no mapa</string>
+    <string name="main_menu_help">Ajuda</string>
+
+    <!-- strings for the help dialog -->
+    <string name="help_text_on_list">Selectione uma localização para abrir uma janela com informações sobre essa localização.\n\nPressione uma localização durante um segundo para permitir a seleção de várias localizações ao mesmo tempo.\n\nCarregue no botão com o olho para mostrar/esconder as localizações que já marcou como visitadas.</string>
+    <string name="help_text_on_info">Escolha uma localização da lista para poder ler sobre a mesma.\n\nNo fim das informações encontra um botão para poder ver a localização marcada no mapa.\n\nSe tiver internet no seu dispositivo e se permitir que acedamos à sua localização, podemos apresentar uma estimativa da sua distância ao local selecionado.\n\nPode usar o botão disponível para marcar uma localização como já visitada.</string>
+    <string name="help_text_on_map">Escolha uma ou várias localizações da lista para as marcar no mapa; se carregar num marcador, pode ver o nome da localização marcada.\n\nPara marcar várias localizações, vá à lista das localizações e pressione uma localização durante cerca de um segundo; escolha as localizaçõe que quer marcar e carregue no botão .</string>
+    <string name="help_text_default">Escolha uma localização para ver os seus detalhes e/ou vê-la no mapa.\nFixe, não é?</string>
+    <string name="ok_button_text">OK</string>
+    <string name="dialog_tag">HELP_DIALOG</string>
+</resources>

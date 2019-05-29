@@ -1,0 +1,108 @@
+{
+  "jogos": {
+    "Lisbon": {
+      "id": 1,
+      "lat": 38.722501,
+      "lon": -9.139435,
+      "info_filename": "lisbon"
+    },
+    "Delft": {
+      "id": 2,
+      "lat": 52.011123,
+      "lon": 4.357191,
+      "info_filename": "delft"
+    },
+    "Localização com nome extremamente comprido que já foi alterado": {
+      "id": 3,
+      "lat": 52.011123,
+      "lon": 4.35,
+      "info_filename": "dummy"
+    },
+    "Oude Kerk": {
+      "id": 4,
+      "lat": 52.012646,
+      "lon": 4.355890,
+      "info_filename": "oude_kerk"
+    },
+    "Nieuwe Kerk": {
+      "id": 5,
+      "lat": 52.012000,
+      "lon": 4.360207,
+      "info_filename": "nieuwe_kerk"
+    },
+    "Stads-Koffyhuis": {
+      "id": 6,
+      "lat": 52.010854,
+      "lon": 4.356463,
+      "info_filename": "dummy"
+    },
+    "Praça Markt": {
+      "id": 7,
+      "lat": 52.011760,
+      "lon": 4.359372,
+      "info_filename": "dummy"
+    },
+    "Amesterdão": {
+      "id": 8,
+      "lat": 52.371803,
+      "lon": 4.896533,
+      "info_filename": "dummy"
+    },
+    "Paris": {
+      "id": 9,
+      "lat": 48.853187,
+      "lon": 2.349389,
+      "info_filename": "dummy"
+    },
+    "Madrid": {
+      "id": 10,
+      "lat": 40.416780,
+      "lon": -3.703812,
+      "info_filename": "dummy"
+    }
+  },
+  "calçada": {
+    "Encher chouriços 1": {
+      "id": 11,
+      "lat": 0,
+      "lon": 0,
+      "info_filename": "dummy"
+    },
+    "Encher chouriços 2": {
+      "id": 12,
+      "lat": 0,
+      "lon": 0,
+      "info_filename": "dummy"
+    },
+    "Encher chouriços 3": {
+      "id": 13,
+      "lat": 0,
+      "lon": 0,
+      "info_filename": "dummy"
+    },
+    "Encher chouriços 4": {
+      "id": 14,
+      "lat": 0,
+      "lon": 0,
+      "info_filename": "dummy"
+    },
+    "Encher chouriços 5": {
+      "id": 15,
+      "lat": 0,
+      "lon": 0,
+      "info_filename": "dummy"
+    },
+    "Encher chouriços 6": {
+      "id": 16,
+      "lat": 0,
+      "lon": 0,
+      "info_filename": "dummy"
+    },
+    "Encher chouriços 7": {
+      "id": 17,
+      "lat": 0,
+      "lon": 0,
+      "info_filename": "dummy"
+    }
+  }
+}
