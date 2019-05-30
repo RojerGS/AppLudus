@@ -20,6 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -143,6 +144,9 @@ public class ListFragment extends Fragment implements
                 }
             }
         });
+        /* This lets us know if the UI is currently showing all locations or only the ones
+            that haven't been visited yet
+         */
         locationsViewModel.getShowingVisited().observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean showing) {
@@ -155,6 +159,9 @@ public class ListFragment extends Fragment implements
                 }
             }
         });
+        /* This lets us know if the user toggled the "visited" status of a location when
+            inside the InfoFragment
+         */
         notificationsViewModel.getVisitedStatusChanged().observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean flag) {
@@ -165,6 +172,7 @@ public class ListFragment extends Fragment implements
                 }
             }
         });
+        /* This contains the flag that lets us know if we are inside a multi selection or not */
         notificationsViewModel.getInsideContextualMultiSelection().observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean flag) {
@@ -200,6 +208,24 @@ public class ListFragment extends Fragment implements
                 }
             }
         });
+        /* This contains the visibility state for the lists of each category */
+        listFragmentViewModel.getVisibleContainers().observe(this, new Observer<List<Boolean>>() {
+            @Override
+            public void onChanged(@Nullable List<Boolean> booleans) {
+                Log.d(LogTAG, "The visibilities are "+booleans.toString());
+                for (int i = 0; i < booleans.size(); ++i) {
+                    View view = categoryContainers.get(i);
+                    view.findViewById(R.id.rv_category_list).setVisibility(
+                            booleans.get(i) ? View.VISIBLE : View.GONE
+                    );
+                    ((ImageView) view.findViewById(R.id.toggle_visibility_button)).setImageResource(
+                            booleans.get(i) ?
+                                    R.drawable.ic_arrow_drop_up_black_24dp :
+                                    R.drawable.ic_arrow_drop_down_black_24dp
+                    );
+                }
+            }
+        });
     }
 
     @Override
@@ -228,6 +254,7 @@ public class ListFragment extends Fragment implements
         Log.d(LogTAG, "Unregistering the observers");
         locationsViewModel.removeObservers(this);
         notificationsViewModel.removeObservers(this);
+        listFragmentViewModel.removeObservers(this);
     }
 
     @Override
@@ -340,12 +367,6 @@ public class ListFragment extends Fragment implements
             String text = getResources().getQuantityString(R.plurals.category_header, names.size(), category.toUpperCase(), names.size());
             textView.setText(text);
         }
-
-        /*
-        int nLocs = locationNames.size();
-        String text = getResources().getQuantityString(R.plurals.locations_count, nLocs, nLocs);
-        mTextView.setText(text);
-        mLocationsAdapter.setLocationsNames(locationNames); */
     }
 
     private void createCategoryAdapters() {
@@ -354,13 +375,16 @@ public class ListFragment extends Fragment implements
                 categoryAdapters.size() == categories.size()) {
             return;
         }
+
         /* Set up the views for the categories */
         ViewGroup container = getActivity().findViewById(R.id.inner_contents_layout);
         categoryContainers = new ArrayList<>();
         categoryAdapters = new ArrayList<>();
-        for (String cat : categories) {
+        List<Boolean> visibilities = new ArrayList<>();
+        for (final String cat : categories) {
             LayoutInflater inflater = getLayoutInflater();
             View view = inflater.inflate(R.layout.category_view, container, false);
+            visibilities.add(false);
 
             RecyclerView recyclerView = view.findViewById(R.id.rv_category_list);
             recyclerView.setLayoutManager(new LinearLayoutManager(
@@ -370,9 +394,23 @@ public class ListFragment extends Fragment implements
             recyclerView.setAdapter(adapter);
             recyclerView.setHasFixedSize(true);
 
+            view.findViewById(R.id.category_header).setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            toggleCategoryListVisibility(cat);
+                        }
+                    }
+            );
+
             container.addView(view);
             categoryContainers.add(view);
             categoryAdapters.add(adapter);
+        }
+        // only send the new visibilities if the previous ones were no good */
+        if (listFragmentViewModel.getVisibleContainers().getValue() == null ||
+                listFragmentViewModel.getVisibleContainers().getValue().size() != visibilities.size()) {
+            listFragmentViewModel.setVisibleContainers(visibilities);
         }
     }
 
@@ -392,6 +430,17 @@ public class ListFragment extends Fragment implements
         } else {
             Log.d(LogTAG, "no adapters available...");
         }
+    }
+
+    public void toggleCategoryListVisibility(String category) {
+        int index = categories.indexOf(category);
+        if (listFragmentViewModel.getVisibleContainers().getValue() == null ||
+                listFragmentViewModel.getVisibleContainers().getValue().size() <= index) {
+            return;
+        }
+        List<Boolean> visibilities = new ArrayList<>(listFragmentViewModel.getVisibleContainers().getValue());
+        visibilities.set(index, !visibilities.get(index));
+        listFragmentViewModel.setVisibleContainers(visibilities);
     }
 
     @Override
