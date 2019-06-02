@@ -104,10 +104,6 @@ public class LocationsAdapter extends RecyclerView.Adapter<LocationsAdapter.Loca
         }
     }
 
-    public List<String> getMultiSelection() {
-        return new ArrayList<>(locationsMarked);
-    }
-
     @Override
     public int getItemCount() {
         if (locationsNames == null) return 0;

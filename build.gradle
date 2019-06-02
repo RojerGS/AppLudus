@@ -19,6 +19,8 @@ allprojects {
     repositories {
         google()
         jcenter()
+        // https://android-arsenal.com/details/1/3224 Indeterminate Check Box
+        maven { url "https://jitpack.io" }
     }
 }
 

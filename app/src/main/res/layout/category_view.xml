@@ -9,6 +9,14 @@
         android:layout_height="match_parent"
         android:orientation="horizontal">
 
+        <com.buildware.widget.indeterm.IndeterminateCheckBox
+            android:id="@+id/cb_category_mark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:visibility="gone"
+            android:layout_gravity="start|center_vertical"/>
+
         <TextView
             android:id="@+id/category_name"
             android:layout_weight="1"

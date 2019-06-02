@@ -20,11 +20,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.buildware.widget.indeterm.IndeterminateCheckBox;
 import com.mathspp.appludus.interfaces.TabChangeRequestHandler;
 import com.mathspp.appludus.viewModels.ListFragmentViewModel;
 import com.mathspp.appludus.viewModels.LocationsViewModel;
@@ -205,6 +208,7 @@ public class ListFragment extends Fragment implements
                     for (LocationsAdapter adapter : categoryAdapters) {
                         adapter.stopMultiSelection();
                     }
+                    listFragmentViewModel.setCategoryMarkedCounter(null);
                 }
             }
         });
@@ -223,6 +227,35 @@ public class ListFragment extends Fragment implements
                                     R.drawable.ic_arrow_drop_up_black_24dp :
                                     R.drawable.ic_arrow_drop_down_black_24dp
                     );
+                }
+            }
+        });
+        /* This knows how many locations are selected, per category, and updates
+            the category checkbox accordingly
+         */
+        listFragmentViewModel.getCategoryMarkedCounter().observe(this, new Observer<List<Integer>>() {
+            @Override
+            public void onChanged(@Nullable List<Integer> integers) {
+                // no multi-selection going on, hide all of the checkboxes
+                if (integers == null) {
+                    for (View view : categoryContainers) {
+                        ((IndeterminateCheckBox) view.findViewById(R.id.cb_category_mark)).setChecked(false);
+                        view.findViewById(R.id.cb_category_mark).setVisibility(View.GONE);
+                    }
+                    return;
+                }
+                for (int i = 0; i < integers.size(); ++i) {
+                    IndeterminateCheckBox cb = categoryContainers.get(i).findViewById(R.id.cb_category_mark);
+                    cb.setVisibility(View.VISIBLE);
+                    int marked = integers.get(i);
+                    if (marked == 0) {
+                        // check https://android-arsenal.com/details/1/3224
+                        cb.setChecked(false);
+                    } else if (marked < categoryAdapters.get(i).getItemCount()) {
+                        cb.setIndeterminate(true);
+                    } else {
+                        cb.setChecked(true);
+                    }
                 }
             }
         });
@@ -301,6 +334,9 @@ public class ListFragment extends Fragment implements
      */
     public void triggerNewContextualMultiSelection() {
         locationsViewModel.setMultiSelected(new ArrayList<Pair<String, String>>());
+        ArrayList<Integer> markedCount = new ArrayList<>();
+        for (int i = 0; i < categoryAdapters.size(); ++i) markedCount.add(0);
+        listFragmentViewModel.setCategoryMarkedCounter(markedCount);
         notificationsViewModel.setInsideContextualMultiSelection(true);
     }
 
@@ -313,7 +349,14 @@ public class ListFragment extends Fragment implements
         if (locationList == null) locationList = new ArrayList<>();
 
         Pair<String, String> pair = new Pair<>(category, location);
-        if (!locationList.contains(pair)) locationList.add(pair);
+        if (!locationList.contains(pair)) {
+            locationList.add(pair);
+            // increase the count
+            List<Integer> markedCount = listFragmentViewModel.getCategoryMarkedCounter().getValue();
+            int index = categories.indexOf(category);
+            markedCount.set(index, markedCount.get(index) + 1);
+            listFragmentViewModel.setCategoryMarkedCounter(markedCount);
+        }
         locationsViewModel.setMultiSelected(locationList);
     }
 
@@ -327,7 +370,13 @@ public class ListFragment extends Fragment implements
         if (locationList == null) locationList = new ArrayList<>();
 
         Pair<String, String> pair = new Pair<>(category, location);
-        locationList.remove(pair);
+        if (locationList.contains(pair)) {
+            locationList.remove(pair);
+            List<Integer> markedCount = listFragmentViewModel.getCategoryMarkedCounter().getValue();
+            int index = categories.indexOf(category);
+            markedCount.set(index, markedCount.get(index) - 1);
+            listFragmentViewModel.setCategoryMarkedCounter(markedCount);
+        }
         locationsViewModel.setMultiSelected(locationList);
     }
 
@@ -394,6 +443,10 @@ public class ListFragment extends Fragment implements
             recyclerView.setAdapter(adapter);
             recyclerView.setHasFixedSize(true);
 
+            container.addView(view);
+            categoryContainers.add(view);
+            categoryAdapters.add(adapter);
+
             view.findViewById(R.id.category_header).setOnClickListener(
                     new View.OnClickListener() {
                         @Override
@@ -403,9 +456,19 @@ public class ListFragment extends Fragment implements
                     }
             );
 
-            container.addView(view);
-            categoryContainers.add(view);
-            categoryAdapters.add(adapter);
+            view.findViewById(R.id.cb_category_mark).setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            IndeterminateCheckBox cb = (IndeterminateCheckBox) v;
+                            if (cb.getState()) {
+                                new CategoryBulkSelectAll().execute(cat);
+                            } else {
+                                new CategoryBulkSelectNone().execute(cat);
+                            }
+                        }
+                    }
+            );
         }
         // only send the new visibilities if the previous ones were no good */
         if (listFragmentViewModel.getVisibleContainers().getValue() == null ||
@@ -481,6 +544,44 @@ public class ListFragment extends Fragment implements
         notificationsViewModel.setInsideContextualMultiSelection(false);
     }
 
+    class CategoryBulkSelectAll extends AsyncTask<String, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            showLoading();
+            super.onPreExecute();
+        }
+        @Override
+        protected Void doInBackground(String... strings) {
+            int id = categories.indexOf(strings[0]);
+            categoryAdapters.get(id).allMultiSelection();
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            showData();
+            super.onPostExecute(aVoid);
+        }
+    }
+
+    class CategoryBulkSelectNone extends AsyncTask<String, Void, Void> {
+        private int index;
+        @Override
+        protected void onPreExecute() {
+            showLoading();
+            super.onPreExecute();
+        }
+        @Override
+        protected Void doInBackground(String... strings) {
+            index = categories.indexOf(strings[0]);
+            categoryAdapters.get(index).clearMultiSelection();
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            showData();
+            super.onPostExecute(aVoid);
+        }
+    }
 
     class ContextualBulkSelectionSetup extends AsyncTask<Integer, Void, Void> {
         public static final int SELECT_ALL = 0;
@@ -496,13 +597,13 @@ public class ListFragment extends Fragment implements
         protected Void doInBackground(Integer... integers) {
             int id = integers[0];
             // (TODO) refactor the select all/none to do by category
-            for (LocationsAdapter adapter : categoryAdapters) {
+            for (int i = 0; i < categoryAdapters.size(); ++i) {
                 switch (id) {
                     case SELECT_ALL:
-                        adapter.allMultiSelection();
+                        categoryAdapters.get(i).allMultiSelection();
                         break;
                     case SELECT_NONE:
-                        adapter.clearMultiSelection();
+                        categoryAdapters.get(i).clearMultiSelection();
                         break;
                 }
             }
@@ -511,6 +612,11 @@ public class ListFragment extends Fragment implements
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            // force the visibility of all lists, otherwise weird stuff happens
+            List<Boolean> visibilities = new ArrayList<>();
+            for (int i = 0; i < categories.size(); ++i) visibilities.add(true);
+            listFragmentViewModel.setVisibleContainers(visibilities);
+
             showData();
             super.onPostExecute(aVoid);
         }
