@@ -57,6 +57,10 @@ public class LocationsViewModel extends AndroidViewModel {
         Log.d(LogTAG, list.toString());
     }
 
+    public void postMultiSelected(List<Pair<String, String>> list) {
+        multiSelected.postValue(list);
+    }
+
     public MutableLiveData<JSONObject> getLocationsJSONdata() {
         return locationsJSONdata;
     }

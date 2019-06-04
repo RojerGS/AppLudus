@@ -237,13 +237,16 @@ public class ListFragment extends Fragment implements
             @Override
             public void onChanged(@Nullable List<Integer> integers) {
                 // no multi-selection going on, hide all of the checkboxes
+                Log.d(LogTAG, "triStateCB: changes observed");
                 if (integers == null) {
+                    Log.d(LogTAG, "triStateCB: null counters");
                     for (View view : categoryContainers) {
                         ((IndeterminateCheckBox) view.findViewById(R.id.cb_category_mark)).setChecked(false);
                         view.findViewById(R.id.cb_category_mark).setVisibility(View.GONE);
                     }
                     return;
                 }
+                Log.d(LogTAG, "triStateCB: counters set to " + integers);
                 for (int i = 0; i < integers.size(); ++i) {
                     IndeterminateCheckBox cb = categoryContainers.get(i).findViewById(R.id.cb_category_mark);
                     cb.setVisibility(View.VISIBLE);
@@ -375,9 +378,9 @@ public class ListFragment extends Fragment implements
             List<Integer> markedCount = listFragmentViewModel.getCategoryMarkedCounter().getValue();
             int index = categories.indexOf(category);
             markedCount.set(index, markedCount.get(index) - 1);
-            listFragmentViewModel.setCategoryMarkedCounter(markedCount);
+            listFragmentViewModel.postCategoryMarkedCounter(markedCount);
         }
-        locationsViewModel.setMultiSelected(locationList);
+        locationsViewModel.postMultiSelected(locationList);
     }
 
     /*  This method checks whether we should display all locations,

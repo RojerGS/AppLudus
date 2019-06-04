@@ -86,6 +86,9 @@ public class LocationsAdapter extends RecyclerView.Adapter<LocationsAdapter.Loca
     }
 
     public void clearMultiSelection() {
+        for (String location : locationsMarked) {
+            mLocationClickHandler.locationUnselected(category, location);
+        }
         locationsMarked = new ArrayList<>();
         notifyDataSetChanged();
     }
