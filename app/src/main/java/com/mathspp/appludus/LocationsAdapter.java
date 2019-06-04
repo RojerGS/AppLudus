@@ -69,6 +69,16 @@ public class LocationsAdapter extends RecyclerView.Adapter<LocationsAdapter.Loca
     public void setLocationsNames(@NonNull List<String> names) {
         locationsNames = new ArrayList<>();
         locationsNames.addAll(names);
+        // if we had locations marked that no longer exist, remove them
+        if (locationsMarked != null) {
+            for (int i = locationsMarked.size()-1; i >= 0; --i) {
+                String loc = locationsMarked.get(i);
+                if (!names.contains(loc)) {
+                    locationsMarked.remove(i);
+                    mLocationClickHandler.locationUnselected(category, loc);
+                }
+            }
+        }
         // this notification is built-in and "refreshes" the UI with the new data
         notifyDataSetChanged();
     }

@@ -130,6 +130,10 @@ public class ListFragment extends Fragment implements
                 }
                 JSONObject data = locationsViewModel.getLocationsJSONdata().getValue();
                 setLocationListContents(data);
+                /* if we are inside multi-selection, we might need to refresh the counts to update
+                    the style of the tri-state checkbox
+                 */
+                listFragmentViewModel.setCategoryMarkedCounter(listFragmentViewModel.getCategoryMarkedCounter().getValue());
             }
         });
         /*  acquire the observer in here
