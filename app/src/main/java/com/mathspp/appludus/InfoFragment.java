@@ -29,8 +29,6 @@ import com.mathspp.appludus.viewModels.LocationsViewModel;
 import com.mathspp.appludus.viewModels.NotificationsViewModel;
 import com.mathspp.appludus.viewModels.UserLocViewModel;
 
-import org.json.JSONException;
-
 import java.util.HashMap;
 
 
@@ -156,7 +154,6 @@ public class InfoFragment extends Fragment {
                     surely do not want to be displaying the wrong info
                  */
                 if (!selected.equals(infoFragmentViewModel.getLastPairUsed().getValue())) {
-                    Log.d(LogTAG, "Clearing distance/time to location info");
                     mDistanceToLocationTV.setText(getString(R.string.distance_to_location_null));
                     mTimeToLocationTV.setText(getString(R.string.time_to_location_null));
                 // if possible, display cached results
@@ -322,7 +319,7 @@ public class InfoFragment extends Fragment {
 
             requestResults = GoogleAPIUtils.getDistanceTo(
                     new LatLng(userLocation.getLatitude(), userLocation.getLongitude()),
-                    selectedLocation, getString(R.string.google_api_key)
+                    selectedLocation, getString(R.string.distance_matrix_api_key)
             );
 
             if (requestResults == null) {  // the requests all failed
