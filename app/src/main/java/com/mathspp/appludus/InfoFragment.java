@@ -24,9 +24,12 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.mathspp.appludus.viewModels.InfoFragmentViewModel;
 import com.mathspp.appludus.viewModels.LocationsViewModel;
 import com.mathspp.appludus.viewModels.NotificationsViewModel;
 import com.mathspp.appludus.viewModels.UserLocViewModel;
+
+import org.json.JSONException;
 
 import java.util.HashMap;
 
@@ -44,6 +47,7 @@ public class InfoFragment extends Fragment {
     private LocationsViewModel locationsViewModel;
     private UserLocViewModel mUserLocViewModel;
     private NotificationsViewModel notificationsViewModel;
+    private InfoFragmentViewModel infoFragmentViewModel;
 
     private TextView mLocationNameTV;
     private LinearLayout mDistanceTimeInfo;
@@ -51,7 +55,8 @@ public class InfoFragment extends Fragment {
     private TextView mTimeToLocationTV;
     private Switch mVisitedSwitch;
     private TextView mLocationInfoTV;
-    private ProgressBar mProgressBar;
+    private ProgressBar mLoadInfoPB;
+    private ProgressBar mLoadDistanceTimePB;
     private Button mShowOnMapButton;
 
     /*  use these so that we can cancel previous async tasks
@@ -71,6 +76,7 @@ public class InfoFragment extends Fragment {
         locationsViewModel = ViewModelProviders.of(getActivity()).get(LocationsViewModel.class);
         mUserLocViewModel = ViewModelProviders.of(getActivity()).get(UserLocViewModel.class);
         notificationsViewModel = ViewModelProviders.of(getActivity()).get(NotificationsViewModel.class);
+        infoFragmentViewModel = ViewModelProviders.of(getActivity()).get(InfoFragmentViewModel.class);
     }
 
     @Override
@@ -88,7 +94,8 @@ public class InfoFragment extends Fragment {
         mTimeToLocationTV = getActivity().findViewById(R.id.tv_time_to);
         mVisitedSwitch = getActivity().findViewById(R.id.switch_visited);
         mLocationInfoTV = getActivity().findViewById(R.id.tv_location_info);
-        mProgressBar = getActivity().findViewById(R.id.pb_loading_info);
+        mLoadInfoPB = getActivity().findViewById(R.id.pb_loading_info);
+        mLoadDistanceTimePB = getActivity().findViewById(R.id.pb_load_distance_time);
         mDistanceTimeInfo = getActivity().findViewById(R.id.distance_time_info_view);
         mShowOnMapButton = getActivity().findViewById(R.id.btn_show_on_map);
 
@@ -101,6 +108,13 @@ public class InfoFragment extends Fragment {
                 if (mUserLocViewModel.getLastKnownLocation().getValue() == null &&
                         !mUserLocViewModel.getLocationSettingsSetupResult().getValue()) {
                     ((MainActivity) getActivity()).mUserLocationSettingsUtils.setupLocationSettings();
+                }
+                /*  Check if we have location settings and if we have a place to find a distance to
+                * but only if we are not calculating distances yet */
+                if (mUserLocViewModel.getLastKnownLocation().getValue() != null &&
+                        locationsViewModel.getSelected().getValue() != null &&
+                        mDistanceAsyncFetcher == null) {
+                    new DistanceAsyncFetcher().execute(locationsViewModel.getSelected().getValue());
                 }
             }
         });
@@ -138,8 +152,24 @@ public class InfoFragment extends Fragment {
                     showLoadingInfo();
                     new InfoAsyncLoader().execute(selected);
                 }
-                if (mDistanceToLocationTV != null && mTimeToLocationTV != null) {
-                    new DistanceAsyncFetcher().execute(selected);
+                /*  if we selected a location for which we do not have the time/distance info, we
+                    surely do not want to be displaying the wrong info
+                 */
+                if (!selected.equals(infoFragmentViewModel.getLastPairUsed().getValue())) {
+                    Log.d(LogTAG, "Clearing distance/time to location info");
+                    mDistanceToLocationTV.setText(getString(R.string.distance_to_location_null));
+                    mTimeToLocationTV.setText(getString(R.string.time_to_location_null));
+                // if possible, display cached results
+                } else {
+                    if (infoFragmentViewModel.getDistanceToLocationStr().getValue() != null) {
+                        mDistanceToLocationTV.setText(getString(R.string.distance_to_location,
+                                infoFragmentViewModel.getDistanceToLocationStr().getValue())
+                        );
+                    }
+                    if (infoFragmentViewModel.getTimeToLocationStr().getValue() != null) {
+                        mTimeToLocationTV.setText(getString(R.string.time_to_location,
+                                infoFragmentViewModel.getTimeToLocationStr().getValue()));
+                    }
                 }
             }
         });
@@ -157,12 +187,38 @@ public class InfoFragment extends Fragment {
             }
         });
 
-        mUserLocViewModel.getLastKnownLocation().observe(this, new Observer<Location>() {
+        /*  Observing changes to the distance/time values will allow us to update them */
+        infoFragmentViewModel.getDistanceToLocationStr().observe(this, new Observer<String>() {
             @Override
-            public void onChanged(@Nullable Location location) {
-                // if some location is selected, update our distance to it
-                if (locationsViewModel.getSelected().getValue() == null) return;
-                new DistanceAsyncFetcher().execute(locationsViewModel.getSelected().getValue());
+            public void onChanged(@Nullable String s) {
+                /* only update if the location we are looking at is the same as the one selected
+                    otherwise set the default distance text
+                 */
+                if (s != null && infoFragmentViewModel.getLastPairUsed().getValue() != null &&
+                        infoFragmentViewModel.getLastPairUsed().getValue().equals(locationsViewModel.getSelected().getValue())) {
+                    mDistanceToLocationTV.setText(
+                            getString(R.string.distance_to_location, s)
+                    );
+                } else {
+                    mDistanceToLocationTV.setText(
+                            getString(R.string.distance_to_location_null)
+                    );
+                }
+            }
+        });
+        infoFragmentViewModel.getTimeToLocationStr().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String s) {
+                if (s != null && infoFragmentViewModel.getLastPairUsed() != null &&
+                        infoFragmentViewModel.getLastPairUsed().getValue().equals(locationsViewModel.getSelected().getValue())) {
+                    mTimeToLocationTV.setText(
+                            getString(R.string.time_to_location, s)
+                    );
+                } else {
+                    mTimeToLocationTV.setText(
+                            getString(R.string.time_to_location_null)
+                    );
+                }
             }
         });
     }
@@ -172,6 +228,7 @@ public class InfoFragment extends Fragment {
         super.onDestroyView();
         /*  unregister the observations when this tab is destroyed */
         locationsViewModel.removeObservers(this);
+        infoFragmentViewModel.removeObservers(this);
     }
 
     @Override
@@ -207,17 +264,30 @@ public class InfoFragment extends Fragment {
 
     public void showLoadingInfo() {
         mLocationInfoTV.setVisibility(View.GONE);
-        mProgressBar.setVisibility(View.VISIBLE);
+        mLoadInfoPB.setVisibility(View.VISIBLE);
     }
 
     public void showInfoLoaded() {
-        mProgressBar.setVisibility(View.GONE);
+        mLoadInfoPB.setVisibility(View.GONE);
         mLocationInfoTV.setVisibility(View.VISIBLE);
+    }
+
+    public void showLoadingDistanceTime() {
+        mDistanceToLocationTV.setVisibility(View.GONE);
+        mTimeToLocationTV.setVisibility(View.GONE);
+        mLoadDistanceTimePB.setVisibility(View.VISIBLE);
+    }
+
+    public void showDistanceTimeLoaded() {
+        mLoadDistanceTimePB.setVisibility(View.GONE);
+        mDistanceToLocationTV.setVisibility(View.VISIBLE);
+        mTimeToLocationTV.setVisibility(View.VISIBLE);
     }
 
     /* Use this location to find time and distance to a given location asynchronously */
     private class DistanceAsyncFetcher extends AsyncTask<Pair<String, String>, Void, HashMap<String, String>> {
         private final String LogTAG = DistanceAsyncFetcher.class.getSimpleName();
+        private final static int SUSPENSE_PAUSE = 800;
 
         @Override
         protected void onPreExecute() {
@@ -225,11 +295,20 @@ public class InfoFragment extends Fragment {
                 mDistanceAsyncFetcher.cancel(true);
             }
             mDistanceAsyncFetcher = this;
+            showLoadingDistanceTime();
             super.onPreExecute();
         }
 
         @Override
         protected HashMap<String, String> doInBackground(Pair<String, String>... pairs) {
+            // do a short pause here to help discourage irrelevant calls by the user
+            try {
+                Thread.sleep(DistanceAsyncFetcher.SUSPENSE_PAUSE);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            infoFragmentViewModel.postLastPairUsed(pairs[0]);
             String category = pairs[0].first;
             String name = pairs[0].second;
             HashMap<String, String> requestResults;
@@ -265,16 +344,9 @@ public class InfoFragment extends Fragment {
                 Log.d(LogTAG, "We are not attached to a context");
                 super.onPostExecute(results);
             }
-            if (mDistanceToLocationTV != null) {
-                mDistanceToLocationTV.setText(getString(R.string.distance_to_location,
-                        results.get(GoogleAPIUtils.DISTANCE_TEXT_KEY)
-                ));
-            }
-            if (mTimeToLocationTV != null) {
-                mTimeToLocationTV.setText(getString(R.string.time_to_location,
-                        results.get(GoogleAPIUtils.TIME_TEXT_KEY)
-                ));
-            }
+            showDistanceTimeLoaded();
+            infoFragmentViewModel.postDistanceToLocationStr(results.get(GoogleAPIUtils.DISTANCE_TEXT_KEY));
+            infoFragmentViewModel.postTimeToLocationStr(results.get(GoogleAPIUtils.TIME_TEXT_KEY));
             mDistanceAsyncFetcher = null;
             super.onPostExecute(results);
         }
@@ -297,6 +369,7 @@ public class InfoFragment extends Fragment {
                 mInfoAsyncLoader.cancel(true);
             }
             mInfoAsyncLoader = this;
+
             super.onPreExecute();
         }
 

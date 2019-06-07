@@ -22,8 +22,8 @@
     <string name="detail_fragment_default_name">Escolha um local da lista.</string>
     <string name="distance_to_location">Distância: %s</string>
     <string name="time_to_location">Tempo: %s</string>
-    <string name="distance_to_location_null">\?</string>
-    <string name="time_to_location_null">\?</string>
+    <string name="distance_to_location_null">\Distância: ?</string>
+    <string name="time_to_location_null">\Tempo: ?</string>
 
     <string name="show_in_map">Ver no mapa</string>
     <string name="back_string">Voltar</string>

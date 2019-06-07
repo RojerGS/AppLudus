@@ -47,11 +47,20 @@
                 <TextView
                     android:id="@+id/tv_distance_to"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:text="@string/distance_to_location_null" />
                 <TextView
                     android:id="@+id/tv_time_to"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:text="@string/time_to_location_null" />
+                <ProgressBar
+                    android:id="@+id/pb_load_distance_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scrollbarSize="5dp"
+                    android:layout_gravity="center"
+                    android:visibility="gone" />
             </LinearLayout>
             <!--This View serves as a visual divider between header and detailed info -->
             <View
