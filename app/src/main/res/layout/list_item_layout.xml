@@ -4,7 +4,13 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <!--This TextView holds the name of a location -->
+    <!--This View serves as a visual divider between list items-->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorDividers" />
+    <!--android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp" /> -->
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,23 +27,13 @@
 
         <TextView
             android:id="@+id/tv_location_name"
-            style="@style/TextAppearance.AppCompat.Large"
+            style="@style/TextAppearance.AppCompat.Body2"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
             android:paddingTop="16dp"
             android:paddingBottom="16dp"
             android:gravity="start|center_vertical"/>
     </LinearLayout>
-
-    <!--This View serves as a visual divider between list items-->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/colorDividers"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp" />
 
 </LinearLayout>

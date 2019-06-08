@@ -37,14 +37,6 @@
                     android:layout_marginLeft="2dp"
                     android:layout_marginRight="2dp" />
 
-                <!-- This recycler view will hold all the different locations -->
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/rv_locations_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="top"
-                    android:paddingBottom="8dp" />
-
             </LinearLayout>
         </android.support.v4.widget.NestedScrollView>
 
