@@ -104,6 +104,9 @@ public class LocationsAdapter extends RecyclerView.Adapter<LocationsAdapter.Loca
     }
 
     public void allMultiSelection() {
+        for (String location : locationsNames) {
+            mLocationClickHandler.locationSelected(category, location);
+        }
         locationsMarked = new ArrayList<>();
         locationsMarked.addAll(locationsNames);
         notifyDataSetChanged();

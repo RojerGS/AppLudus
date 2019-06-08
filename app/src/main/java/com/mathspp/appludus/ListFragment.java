@@ -362,9 +362,9 @@ public class ListFragment extends Fragment implements
             List<Integer> markedCount = listFragmentViewModel.getCategoryMarkedCounter().getValue();
             int index = categories.indexOf(category);
             markedCount.set(index, markedCount.get(index) + 1);
-            listFragmentViewModel.setCategoryMarkedCounter(markedCount);
+            listFragmentViewModel.postCategoryMarkedCounter(markedCount);
         }
-        locationsViewModel.setMultiSelected(locationList);
+        locationsViewModel.postMultiSelected(locationList);
     }
 
     @Override
