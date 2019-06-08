@@ -106,6 +106,10 @@ public class InfoFragment extends Fragment {
                 if (mUserLocViewModel.getLastKnownLocation().getValue() == null &&
                         !mUserLocViewModel.getLocationSettingsSetupResult().getValue()) {
                     ((MainActivity) getActivity()).mUserLocationSettingsUtils.setupLocationSettings();
+                    /* If we have no prior location knowledge but we can ask for it, ask for it */
+                } else if (mUserLocViewModel.getLastKnownLocation().getValue() == null &&
+                        mUserLocViewModel.getLocationSettingsSetupResult().getValue()) {
+                    ((MainActivity) getActivity()).mUserLocationSettingsUtils.getDeviceLocation();
                 }
                 /*  Check if we have location settings and if we have a place to find a distance to
                 * but only if we are not calculating distances yet */
